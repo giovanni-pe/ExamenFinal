@@ -3,7 +3,8 @@
 
 Aquí tienes un video que detalla la arquitectura, los componentes y el flujo de trabajo del proyecto:
 
-[![Video Explicativo del Proyecto](https://youtu.be/rhLbyPp6w6A?si=vPmrVf8cyz6XgUs4/0.jpg)](https://youtu.be/rhLbyPp6w6A?si=vPmrVf8cyz6XgUs4)
+[![Video Explicativo del Proyecto](https://img.youtube.com/vi/rhLbyPp6w6A/0.jpg)](https://youtu.be/rhLbyPp6w6A)
+
 
 
 > **Nota:** Haz clic en la imagen para abrir el video en YouTube.
