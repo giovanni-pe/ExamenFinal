@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  alpha-service:
+    build:
+      context: ./products_api
+    ports:
+      - "80:5001"
+    restart: always
+    networks:
+      - nodejs-network
+
+  beta-service:
+    build:
+      context: ./sales_api
+    ports:
+      - "443:5000"
+    restart: always
+    networks:
+      - nodejs-network
+
+networks:
+  nodejs-network:
+    driver: bridge

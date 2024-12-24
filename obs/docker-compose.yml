@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - METRICS_EXPORTER=prometheus
+    ports:
+      - "16686:16686" # Interfaz de Jaeger
+      - "4318:4318"   # Colector OTLP HTTP
+      - "8888:8888"   # Exportador de métricas para Prometheus
+      - "14250:14250" # gRPC Collector
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090" # Interfaz de Prometheus
+    depends_on:
+      - jaeger
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "20000:3000" # Interfaz de Grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/custom.ini:/etc/grafana/grafana.ini

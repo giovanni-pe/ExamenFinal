@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s # Intervalo de recolección de métricas
+
+scrape_configs:
+  - job_name: "jaeger"
+    static_configs:
+      - targets: ["0.0.0.0:8888"] # Endpoint de métricas de Jaeger

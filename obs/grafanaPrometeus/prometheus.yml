@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s # Intervalo de recolección de métricas
+
+scrape_configs:
+  - job_name: 'app'
+    static_configs:
+      - targets: ['localhost:5001'] # URL de tu aplicación desplegada

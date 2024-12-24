@@ -1,0 +1,96 @@
+name: CI/CD Pipeline for DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DO_HOST_1: 167.71.189.57
+  DO_HOST_2: 167.71.177.91
+  REPO_URL: https://github.com/giovanni-pe/trabajofinal.git
+
+jobs:
+  install-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: |
+          echo "Running as user $(whoami)"
+          echo "Installing npm dependencies..."
+          npm install
+
+  deploy-apis:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
+
+      - name: Deploy to Private Host
+        run: |
+          sshpass -p "${{ secrets.DROPLET_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@"${{ env.DO_HOST_1 }}" << 'EOF'
+            #!/bin/bash
+
+            echo "Stopping running containers..."
+            sudo docker stop $(sudo docker ps -q) || echo "No running containers."
+
+            echo "Removing existing containers..."
+            sudo docker rm $(sudo docker ps -aq) || echo "No containers to remove."
+
+            echo "Removing Docker images..."
+            sudo docker rmi $(sudo docker images -q) || echo "No images to remove."
+
+            echo "Cloning the repository..."
+            sudo rm -rf /home/nodeapp
+            git clone ${{ env.REPO_URL }} /home/nodeapp
+            cd /home/nodeapp
+            echo "Running Docker Compose..."
+            sudo docker-compose up --build -d
+          EOF
+
+  deploy-obs:
+    runs-on: ubuntu-latest
+    needs: deploy-apis
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get install sshpass
+
+      - name: Deploy to Public Host
+        run: |
+          sshpass -p "${{ secrets.DROPLET_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@"${{ env.DO_HOST_2 }}" << 'EOF'
+            #!/bin/bash
+
+            echo "Stopping running containers..."
+            sudo docker stop $(sudo docker ps -q) || echo "No running containers."
+
+            echo "Removing existing containers..."
+            sudo docker rm $(sudo docker ps -aq) || echo "No containers to remove."
+
+            echo "Removing Docker images..."
+            sudo docker rmi $(sudo docker images -q) || echo "No images to remove."
+
+            echo "Cloning the repository..."
+            sudo rm -rf /home/nodeapp
+            git clone ${{ env.REPO_URL }} /home/nodeapp
+
+            echo "Running Docker Compose..."
+            cd /home/nodeapp/obs
+            sudo docker-compose up --build -d
+          EOF

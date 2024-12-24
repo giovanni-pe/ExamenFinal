@@ -1,0 +1,11 @@
+exporters:
+  otlp/jaeger:
+    endpoint: "0.0.0.0:4317"  # Nombre del servicio en docker-compose
+    tls:
+      insecure: true
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: []
+      exporters: [logging]
